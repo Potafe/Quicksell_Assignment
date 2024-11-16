@@ -1,15 +1,17 @@
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import Header from "./Components/Header";
+import Grid from "./Components/KanbanGrid";
 import { GET_TICKETS_URL } from "./api";
-import { createTicketGrid, mapUsers } from "./utils";
-import Header from "./Components/Header/index";
+import { loadGrid, mapUsersByUserId } from "./utils/index";
+import Loader from "./Components/Loader";
 import "./App.css";
 
 function App() {
   const [tickets, setTickets] = useState([]);
   const [userData, setUserData] = useState({});
   const [gridData, setGridData] = useState({});
-  const [grouping, setGrouping] = useState("status");
-  const [ordering, setOrdering] = useState("priority");
+  const [grouping, setGroupingValue] = useState("status");
+  const [ordering, setOrderingValue] = useState("priority");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,26 +21,26 @@ function App() {
       .then((res) => {
         const { tickets, users } = res;
         setTickets(tickets);
-        setUserData(mapUsers(users));
+        setUserData(mapUsersByUserId(users));
       })
       .catch((err) => {});
   }, []);
 
   useEffect(() => {
     if (!tickets.length) return;
-    setGridData(createTicketGrid(tickets, grouping, ordering));
+    setGridData(loadGrid(tickets, grouping, ordering));
     setLoading(false);
   }, [grouping, ordering, tickets]);
 
-  const onSetGrouping = useCallback((value) => {
+  const onsetGroupingValue = useCallback((value) => {
     setLoading(true);
-    setGrouping(value);
+    setGroupingValue(value);
     saveSettings({ grouping: value });
   }, []);
 
-  const onSetOrdering = useCallback((value) => {
+  const onsetOrderingValue = useCallback((value) => {
     setLoading(true);
-    setOrdering(value);
+    setOrderingValue(value);
     saveSettings({ ordering: value });
   }, []);
 
@@ -47,18 +49,23 @@ function App() {
   }, []);
 
   const loadSettings = useCallback(() => {
-    setGrouping(localStorage.getItem("grouping") || "status");
-    setOrdering(localStorage.getItem("ordering") || "priority");
+    setGroupingValue(localStorage.getItem("grouping") || "status");
+    setOrderingValue(localStorage.getItem("ordering") || "priority");
   }, []);
 
   return (
     <div className="App">
       <Header
         grouping={grouping}
-        setGrouping={onSetGrouping}
+        setGroupingValue={onsetGroupingValue}
         ordering={ordering}
-        setOrdering={onSetOrdering}
+        setOrderingValue={onsetOrderingValue}
       />
+      {loading ? (
+        <Loader />
+      ) : (
+        <Grid gridData={gridData} grouping={grouping} UserMapping={userData} />
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import React from "react";
 
-const getPriorityDescription = (priorityLevel) => {
-  switch (priorityLevel) {
+const getPriorityLabel = (priority) => {
+  switch (priority) {
     case 0:
       return "No priority";
     case 1:
@@ -17,93 +17,93 @@ const getPriorityDescription = (priorityLevel) => {
   }
 };
 
-const sortByPriority = (ticketsList) =>
-  ticketsList.sort((a, b) => (a.priority > b.priority ? -1 : 1));
+const orderByPriority = (tickets) =>
+  tickets.sort((a, b) => (a.priority > b.priority ? -1 : 1));
 
-const sortByTitle = (ticketsList) =>
-  ticketsList.sort((a, b) => (a.title < b.title ? -1 : 1));
+const orderByTitle = (tickets) =>
+  tickets.sort((a, b) => (a.title < b.title ? -1 : 1));
 
-export const categorizeByStatus = (ticketsList) => {
-  const grouped = ticketsList.reduce(
-    (accumulator, ticket) => {
-      if (!accumulator[ticket.status]) {
-        accumulator[ticket.status] = [];
+export const groupTicketsByStatus = (tickets) => {
+  const groups = tickets.reduce(
+    (result, ticket) => {
+      if (!result[ticket.status]) {
+        result[ticket.status] = [];
       }
-      accumulator[ticket.status].push(ticket);
-      return accumulator;
+      result[ticket.status].push(ticket);
+      return result;
     },
     { Backlog: [], Todo: [], "In progress": [], Done: [], Canceled: [] }
   );
 
-  return grouped;
+  return groups;
 };
 
-export const categorizeByPriority = (ticketsList) => {
-  const grouped = ticketsList.reduce(
-    (accumulator, ticket) => {
-      const priorityLabel = getPriorityDescription(ticket.priority);
-      if (!accumulator[priorityLabel]) {
-        accumulator[priorityLabel] = [];
+export const groupTicketsByPriority = (tickets) => {
+  const groups = tickets.reduce(
+    (result, ticket) => {
+      const priority = getPriorityLabel(ticket.priority);
+      if (!result[priority]) {
+        result[priority] = [];
       }
-      accumulator[priorityLabel].push(ticket);
-      return accumulator;
+      result[priority].push(ticket);
+      return result;
     },
     { "No priority": [], Urgent: [], High: [], Medium: [], Low: [] }
   );
 
-  return grouped;
+  return groups;
 };
 
-export const categorizeByUser = (ticketsList) => {
-  const grouped = ticketsList.reduce((accumulator, ticket) => {
-    if (!accumulator[ticket.userId]) {
-      accumulator[ticket.userId] = [];
+export const groupTicketsByUserId = (tickets) => {
+  const groups = tickets.reduce((result, ticket) => {
+    if (!result[ticket.userId]) {
+      result[ticket.userId] = [];
     }
-    accumulator[ticket.userId].push(ticket);
-    return accumulator;
+    result[ticket.userId].push(ticket);
+    return result;
   }, {});
 
-  return grouped;
+  return groups;
 };
 
-export const mapUsers = (usersList) => {
-  let userMap = usersList.reduce((accumulator, user) => {
+export const mapUsersByUserId = (users) => {
+  let group = users.reduce((accumulator, user) => {
     accumulator[user.id] = user;
     return accumulator;
   }, {});
 
-  return userMap;
+  return group;
 };
 
-export const createTicketGrid = (ticketsList, groupingType, sortingType) => {
-  let sortedTickets;
-  if (sortingType === "priority") sortedTickets = sortByPriority(ticketsList);
-  else sortedTickets = sortByTitle(ticketsList);
+export const loadGrid = (tickets, grouping, ordering) => {
+  let orderedTickets;
+  if (ordering === "priority") orderedTickets = orderByPriority(tickets);
+  else orderedTickets = orderByTitle(tickets);
 
-  switch (groupingType) {
+  switch (grouping) {
     case "status":
-      return categorizeByStatus(sortedTickets);
+      return groupTicketsByStatus(orderedTickets);
     case "priority":
-      return categorizeByPriority(sortedTickets);
+      return groupTicketsByPriority(orderedTickets);
     case "user":
-      return categorizeByUser(sortedTickets);
+      return groupTicketsByUserId(orderedTickets);
     default:
-      return categorizeByUser(sortedTickets);
+      return groupTicketsByUserId(orderedTickets);
   }
 };
 
-const TicketDisplay = ({ ticketsList, groupingType, sortingType }) => {
-  const groupedTickets = createTicketGrid(ticketsList, groupingType, sortingType);
+const TicketGrid = ({ tickets, grouping, ordering }) => {
+  const groupedTickets = loadGrid(tickets, grouping, ordering);
 
   return (
     <div>
-      {Object.entries(groupedTickets).map(([groupName, ticketsInGroup]) => (
-        <div key={groupName}>
-          <h3>{groupName}</h3>
+      {Object.entries(groupedTickets).map(([groupKey, groupTickets]) => (
+        <div key={groupKey}>
+          <h3>{groupKey}</h3>
           <ul>
-            {ticketsInGroup.map((ticket) => (
+            {groupTickets.map((ticket) => (
               <li key={ticket.id}>
-                {ticket.title} - {getPriorityDescription(ticket.priority)} -{" "}
+                {ticket.title} - {getPriorityLabel(ticket.priority)} -{" "}
                 {ticket.status}
               </li>
             ))}
@@ -114,4 +114,4 @@ const TicketDisplay = ({ ticketsList, groupingType, sortingType }) => {
   );
 };
 
-export default TicketDisplay;
+export default TicketGrid;
