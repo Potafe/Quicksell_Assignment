@@ -1,10 +1,10 @@
 import './Header.css';
 import DropdownDisplayMenu from '../Dropdown/index';
 
-function DropdownHeader({ grouping, setGrouping, ordering, setOrdering }) {
+function DropdownHeader({ grouping, setGroupingValue, ordering, setOrderingValue }) {
     return (
         <header>
-            <DropdownDisplayMenu grouping={grouping} setGrouping={setGrouping} ordering={ordering} setOrdering={setOrdering} />
+            <DropdownDisplayMenu grouping={grouping} setGroupingValue={setGroupingValue} ordering={ordering} setOrderingValue={setOrderingValue} />
         </header>
     );
 }
