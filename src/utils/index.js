@@ -1,6 +1,6 @@
 import React from "react";
 
-const getPriorityLabel = (priority) => {
+export const getPriorityLabel = (priority) => {
   switch (priority) {
     case 0:
       return "No priority";
@@ -17,8 +17,9 @@ const getPriorityLabel = (priority) => {
   }
 };
 
-const orderByPriority = (tickets) =>
-  tickets.sort((a, b) => (a.priority > b.priority ? -1 : 1));
+const orderByPriority = (tickets) => {
+  return tickets.sort((a, b) => b.priority - a.priority);
+};
 
 const orderByTitle = (tickets) =>
   tickets.sort((a, b) => (a.title < b.title ? -1 : 1));
@@ -88,7 +89,7 @@ export const loadGrid = (tickets, grouping, ordering) => {
     case "user":
       return groupTicketsByUserId(orderedTickets);
     default:
-      return groupTicketsByUserId(orderedTickets);
+      return groupTicketsByPriority(orderedTickets);
   }
 };
 
